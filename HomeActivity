@@ -1,0 +1,79 @@
+package com.example.lib
+
+import android.os.Bundle
+import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
+import androidx.navigation.NavController
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.setupActionBarWithNavController
+import androidx.navigation.ui.setupWithNavController
+import com.example.lib.databinding.ActivityHomeBinding
+import com.google.android.material.bottomnavigation.BottomNavigationView
+
+class HomeActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityHomeBinding
+    private lateinit var navController: NavController
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        Log.d("HomeActivity", "onCreate() called - START")
+
+        try {
+            binding = ActivityHomeBinding.inflate(layoutInflater)
+            setContentView(binding.root)
+            Log.d("HomeActivity", "Content view set")
+
+            // Установка Toolbar
+            val toolbar: Toolbar = binding.toolbar
+            setSupportActionBar(toolbar)
+            Log.d("HomeActivity", "Action bar set")
+
+            // ИСПРАВЛЕНО: Получение NavController через NavHostFragment
+            val navHostFragment = supportFragmentManager
+                .findFragmentById(R.id.nav_host_fragment_activity_home) as NavHostFragment
+            navController = navHostFragment.navController
+            Log.d("HomeActivity", "NavController obtained")
+
+            // Настройка AppBarConfiguration
+            val appBarConfiguration = AppBarConfiguration(
+                setOf(
+                    R.id.navigation_home,
+                    R.id.navigation_book,
+                    R.id.navigation_profile
+                )
+            )
+            setupActionBarWithNavController(navController, appBarConfiguration)
+            Log.d("HomeActivity", "AppBarConfiguration setup completed")
+
+            // Связывание BottomNavigationView с NavController
+            val navView: BottomNavigationView = binding.navView
+            navView.setupWithNavController(navController)
+            Log.d("HomeActivity", "BottomNavigationView setup completed")
+
+            // Добавлено для отладки
+            navView.setOnItemSelectedListener { item ->
+                Log.d("Navigation", "Selected item: ${item.itemId}")
+                try {
+                    navController.navigate(item.itemId)
+                    true
+                } catch (e: Exception) {
+                    Log.e("Navigation", "Navigation error: ${e.message}")
+                    false
+                }
+            }
+
+        } catch (e: Exception) {
+            Log.e("HomeActivity", "Exception in onCreate: ${e.message}", e)
+            e.printStackTrace()
+        } finally {
+            Log.d("HomeActivity", "onCreate() called - END")
+        }
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        return navController.navigateUp() || super.onSupportNavigateUp()
+    }
+}
